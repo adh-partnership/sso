@@ -92,12 +92,13 @@ func GetCallback(c *gin.Context) {
 	go func() {
 		tokenUrl := fmt.Sprintf("%s%s", os.Getenv("VATSIM_BASE_URL"), os.Getenv("VATSIM_TOKEN_PATH"))
 
-		data := url.Values{}
-		data.Set("grant_type", "authorization_code")
-		data.Set("code", code)
-		data.Set("redirect_uri", returnUri)
-		data.Set("client_id", os.Getenv("VATSIM_OAUTH_CLIENT_ID"))
-		data.Set("client_secret", os.Getenv("VATSIM_OAUTH_CLIENT_SECRET"))
+		data := map[string]string{
+			"grant_type":    "authorization_code",
+			"code":          code,
+			"redirect_uri":  returnUri,
+			"client_id":     os.Getenv("VATSIM_OAUTH_CLIENT_ID"),
+			"client_secret": os.Getenv("VATSIM_OAUTH_CLIENT_SECRET"),
+		}
 
 		json_data, err := json.Marshal(data)
 		if err != nil {
