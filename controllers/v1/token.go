@@ -27,14 +27,15 @@ import (
 	"os"
 	"time"
 
-	"github.com/dhawton/log4g"
 	"github.com/gin-gonic/gin"
+	"github.com/kzdv/sso/database/models"
+	utils "github.com/kzdv/sso/pkg/utils"
+	dbTypes "github.com/kzdv/types/database"
 	"github.com/lestrrat-go/jwx/jwa"
 	"github.com/lestrrat-go/jwx/jwk"
 	"github.com/lestrrat-go/jwx/jwt"
-	utils "github.com/vzau/common/utils"
-	"github.com/vzau/sso/database/models"
-	dbTypes "github.com/vzau/types/database"
+	"gorm.io/gorm/clause"
+	"hawton.dev/log4g"
 )
 
 type TokenRequest struct {
@@ -50,6 +51,7 @@ type TokenResponse struct {
 	AccessToken         string `json:"access_token"`
 	ExpiresIn           int    `json:"expires_in"`
 	TokenType           string `json:"token_type"`
+	IdToken             string `json:"id_token"`
 	CodeChallenge       string `json:"code_challenge"`
 	CodeChallengeMethod string `json:"code_challenge_method"`
 }
@@ -102,10 +104,17 @@ func PostToken(c *gin.Context) {
 	if login.CodeChallengeMethod == "S256" {
 		hash := sha256.Sum256([]byte(treq.CodeVerifier))
 		if login.CodeChallenge != base64.RawURLEncoding.EncodeToString(hash[:]) {
-			log4g.Category("controllers/token").Error(fmt.Sprintf("Code Challenge failed"))
+			log4g.Category("controllers/token").Error("Code Challenge failed")
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_grant"})
 			return
 		}
+	}
+
+	user := dbTypes.User{}
+	if err := models.DB.Preload(clause.Associations).Where(dbTypes.User{CID: login.CID}).Find(&user).Error; err != nil {
+		log4g.Category("controllers/token").Error("User %s not found", login.CID)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_request"})
+		return
 	}
 
 	keyset, err := jwk.Parse([]byte(os.Getenv("SSO_JWKS")))
@@ -128,11 +137,11 @@ func PostToken(c *gin.Context) {
 		return
 	}
 	token := jwt.New()
-	token.Set(jwt.IssuerKey, utils.Getenv("SSO_ISSUERKEY", "auth.chicagoartcc.org"))
+	token.Set(jwt.IssuerKey, utils.Getenv("SSO_ISSUERKEY", "auth.denartcc.org"))
 	token.Set(jwt.AudienceKey, login.Client.Name)
 	token.Set(jwt.SubjectKey, fmt.Sprint(login.CID))
 	token.Set(jwt.IssuedAtKey, time.Now())
-	token.Set(jwt.ExpirationKey, time.Now().Add((time.Hour * 24 * 7)).Unix())
+	token.Set(jwt.ExpirationKey, time.Now().Add(time.Duration(login.Client.TTL)*time.Second).Unix())
 	signed, err := jwt.Sign(token, jwa.SignatureAlgorithm(key.Algorithm()), key)
 	if err != nil {
 		log4g.Category("controllers/token").Error("Failed to create JWT: " + err.Error())
@@ -146,6 +155,26 @@ func PostToken(c *gin.Context) {
 		TokenType:           "Bearer",
 		CodeChallenge:       login.CodeChallenge,
 		CodeChallengeMethod: login.CodeChallengeMethod,
+	}
+
+	if c.Query("scope") == "openid" && c.Query("response_type") == "id_token" {
+		token := jwt.New()
+		token.Set(jwt.IssuerKey, utils.Getenv("SSO_ISSUERKEY", "auth.denartcc.org"))
+		token.Set(jwt.AudienceKey, login.Client.Name)
+		token.Set(jwt.SubjectKey, fmt.Sprint(login.CID))
+		token.Set(jwt.IssuedAtKey, time.Now())
+		token.Set(jwt.ExpirationKey, time.Now().Add(time.Duration(login.Client.TTL)*time.Second).Unix())
+		token.Set("name", fmt.Sprintf("%s %s", user.FirstName, user.LastName))
+		token.Set("given_name", user.FirstName)
+		token.Set("family_name", user.LastName)
+		token.Set("roles", user.Roles)
+		idsigned, err := jwt.Sign(token, jwa.SignatureAlgorithm(key.Algorithm()), key)
+		if err != nil {
+			log4g.Category("controllers/token").Error("Failed to create JWT: " + err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid_grant"})
+			return
+		}
+		ret.IdToken = string(idsigned)
 	}
 
 	c.JSON(http.StatusOK, ret)

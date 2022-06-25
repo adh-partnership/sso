@@ -24,13 +24,13 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/dhawton/log4g"
 	"github.com/gin-gonic/gin"
+	"github.com/kzdv/sso/database/models"
+	dbTypes "github.com/kzdv/types/database"
 	"github.com/lestrrat-go/jwx/jwk"
 	"github.com/lestrrat-go/jwx/jwt"
-	"github.com/vzau/sso/database/models"
-	dbTypes "github.com/vzau/types/database"
 	"gorm.io/gorm/clause"
+	"hawton.dev/log4g"
 )
 
 var (

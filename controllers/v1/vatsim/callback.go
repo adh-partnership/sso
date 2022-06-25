@@ -30,10 +30,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/dhawton/log4g"
 	"github.com/gin-gonic/gin"
+	"github.com/kzdv/sso/database/models"
 	gonanoid "github.com/matoous/go-nanoid/v2"
-	"github.com/vzau/sso/database/models"
+	"hawton.dev/log4g"
 )
 
 type OAuthResponse struct {

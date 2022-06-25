@@ -22,10 +22,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dhawton/log4g"
-	dbTypes "github.com/vzau/types/database"
+	dbTypes "github.com/kzdv/types/database"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"hawton.dev/log4g"
 )
 
 var DB *gorm.DB

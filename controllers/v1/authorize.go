@@ -20,16 +20,16 @@ package v1
 
 import (
 	"fmt"
-	"net"
 	"net/http"
+	"net/url"
+	"os"
 	"time"
 
-	"github.com/dhawton/log4g"
 	"github.com/gin-gonic/gin"
+	"github.com/kzdv/sso/database/models"
+	dbTypes "github.com/kzdv/types/database"
 	gonanoid "github.com/matoous/go-nanoid/v2"
-	"github.com/vzau/sso/database/models"
-	"github.com/vzau/sso/utils"
-	dbTypes "github.com/vzau/types/database"
+	"hawton.dev/log4g"
 )
 
 type AuthorizeRequest struct {
@@ -98,26 +98,29 @@ func GetAuthorize(c *gin.Context) {
 		return
 	}
 
-	/*	Leave this here, hopefully ULSv3 lets us send the return url instead of an ID #
-
-		scheme := "http"
-		if c.Request.TLS != nil && c.Request.TLS.HandshakeComplete {
-			scheme = "https"
-		}
-		returnUri := url.QueryEscape(fmt.Sprintf("%s://%s/v1/return", scheme, c.Request.Host)) */
-
-	host, _, _ := net.SplitHostPort(c.Request.Host)
-	if host == "" {
-		host = c.Request.Host
+	scheme := "http"
+	if c.Request.TLS != nil && c.Request.TLS.HandshakeComplete {
+		scheme = "https"
 	}
-	log4g.Category("test").Debug(host)
+	returnUri := url.QueryEscape(fmt.Sprintf("%s://%s/oauth/callback", scheme, c.Request.Host))
+	/*
+		host, _, _ := net.SplitHostPort(c.Request.Host)
+		if host == "" {
+			host = c.Request.Host
+		}
+		log4g.Category("test").Debug(host) */
 	c.SetCookie("sso_token", login.Token, int(time.Minute)*5, "/", host, false, true)
 
-	redirect_url := fmt.Sprintf("https://login.vatusa.net/uls/v2/login?fac=%s&url=%s&rfc7519_compliance", utils.Getenv("ULS_FACILITY_ID", "ZAU"), utils.Getenv("ULS_REDIRECT_ID", "1"))
+	//redirect_url := fmt.Sprintf("https://login.vatusa.net/uls/v2/login?fac=%s&url=%s&rfc7519_compliance", utils.Getenv("ULS_FACILITY_ID", "ZAU"), utils.Getenv("ULS_REDIRECT_ID", "1"))
 
-	/*
-		redirect_uri := url.QueryEscape(os.Getenv("VATSIM_REDIRECT_URI"))
-		vatsim_url := fmt.Sprintf("https://auth.vatsim.net/oauth/authorize?client_id=%s&redirect_uri=%s&scope=%s&response_type=code", os.Getenv("VATSIM_OAUTH_CLIENT_ID"), redirect_uri, url.QueryEscape("full_name email vatsim_details country"))
-	*/
-	c.Redirect(http.StatusTemporaryRedirect, redirect_url)
+	//		redirect_uri := url.QueryEscape(os.Getenv("VATSIM_REDIRECT_URI"))
+	vatsim_url := fmt.Sprintf("%s%s?client_id=%s&redirect_uri=%s&scope=%s&response_type=code",
+		os.Getenv("VATSIM_BASE_URL"),
+		os.Getenv("VATSIM_AUTHORIZE_PATH"),
+		os.Getenv("VATSIM_OAUTH_CLIENT_ID"),
+		returnUri,
+		os.Getenv("VATSIM_OAUTH_SCOPES")
+	)
+
+	c.Redirect(http.StatusTemporaryRedirect, vatsim_url)
 }

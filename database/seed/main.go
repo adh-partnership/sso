@@ -21,10 +21,10 @@ package seed
 import (
 	"errors"
 
-	"github.com/dhawton/log4g"
-	"github.com/vzau/sso/database/models"
-	dbTypes "github.com/vzau/types/database"
+	"github.com/kzdv/sso/database/models"
+	dbTypes "github.com/kzdv/types/database"
 	"gorm.io/gorm"
+	"hawton.dev/log4g"
 )
 
 var log = log4g.Category("seed")

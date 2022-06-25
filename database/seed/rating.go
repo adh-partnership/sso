@@ -21,10 +21,10 @@ package seed
 import (
 	"encoding/json"
 
-	"github.com/dhawton/log4g"
-	"github.com/vzau/sso/database/models"
-	dbTypes "github.com/vzau/types/database"
+	"github.com/kzdv/sso/database/models"
+	dbTypes "github.com/kzdv/types/database"
 	"gorm.io/gorm/clause"
+	"hawton.dev/log4g"
 )
 
 type RatingInfo struct {

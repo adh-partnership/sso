@@ -24,15 +24,15 @@ import (
 	"time"
 
 	"github.com/common-nighthawk/go-figure"
-	"github.com/dhawton/log4g"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/kzdv/sso/database/models"
+	"github.com/kzdv/sso/database/seed"
+	"github.com/kzdv/sso/utils"
+	dbTypes "github.com/kzdv/types/database"
 	"github.com/lestrrat-go/jwx/jwk"
 	"github.com/robfig/cron/v3"
-	"github.com/vzau/sso/database/models"
-	"github.com/vzau/sso/database/seed"
-	"github.com/vzau/sso/utils"
-	dbTypes "github.com/vzau/types/database"
+	"hawton.dev/log4g"
 )
 
 var log = log4g.Category("main")
@@ -67,7 +67,7 @@ func main() {
 	}
 
 	log.Info("Connecting to database and handling migrations")
-	models.Connect(utils.Getenv("DB_USERNAME", "root"), utils.Getenv("DB_PASSWORD", "secret"), utils.Getenv("DB_HOSTNAME", "localhost"), utils.Getenv("DB_PORT", "3306"), utils.Getenv("DB_DATABASE", "zdv"))
+	models.Connect(utils.Getenv("DB_USERNAME", "root"), utils.Getenv("DB_PASSWORD", "secret"), utils.Getenv("DB_HOST", "localhost"), utils.Getenv("DB_PORT", "3306"), utils.Getenv("DB_DATABASE", "zdv"))
 	seed.CheckSeeds()
 
 	log.Info("Configuring Gin Server")

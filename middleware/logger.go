@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"time"
 
-	log "github.com/dhawton/log4g"
 	"github.com/gin-gonic/gin"
+	log "hawton.dev/log4g"
 )
 
 func Logger(c *gin.Context) {

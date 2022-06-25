@@ -21,8 +21,8 @@ package v1
 import (
 	"net/http"
 
-	"github.com/dhawton/log4g"
 	"github.com/gin-gonic/gin"
+	"hawton.dev/log4g"
 )
 
 func handleError(c *gin.Context, message string) {

@@ -23,9 +23,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/dhawton/log4g"
 	"github.com/gin-gonic/gin"
 	"github.com/lestrrat-go/jwx/jwk"
+	"hawton.dev/log4g"
 )
 
 type certReturn struct {
