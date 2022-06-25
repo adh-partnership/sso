@@ -125,7 +125,9 @@ func PostToken(c *gin.Context) {
 	}
 
 	rand.Seed(time.Now().Unix())
-	key, ok := keyset.Get(rand.Intn(keyset.Len()))
+	i := rand.Intn(keyset.Len())
+	log4g.Category("controller/token").Debug("Using key %d", i)
+	key, ok := keyset.Get(i)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
 		log4g.Category("controllers/token").Error("Could not find current key in JWKs")
@@ -136,6 +138,7 @@ func PostToken(c *gin.Context) {
 		log4g.Category("controllers/token").Error("Could not find current key in JWKs")
 		return
 	}
+	log4g.Category("controllers/token").Debug("Using key %+v", key)
 	token := jwt.New()
 	token.Set(jwt.IssuerKey, utils.Getenv("SSO_ISSUERKEY", "auth.denartcc.org"))
 	token.Set(jwt.AudienceKey, login.Client.Name)
