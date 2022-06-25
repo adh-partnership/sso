@@ -50,6 +50,8 @@ github.com/kzdv/types v0.0.0-20220620194852-b4093996441b h1:SNegbthZXZ5l4dK4aeCY
 github.com/kzdv/types v0.0.0-20220620194852-b4093996441b/go.mod h1:KCVtHpRxBldhoguu9pDby3iQ+hmvOsPNB1tE4h7d7nk=
 github.com/kzdv/types v0.0.0-20220625054431-22c3bd3924bc h1:P2d6GMNn23/KfoF1Cl5x/b8hYpAYlmObsWkao/LSMKs=
 github.com/kzdv/types v0.0.0-20220625054431-22c3bd3924bc/go.mod h1:KCVtHpRxBldhoguu9pDby3iQ+hmvOsPNB1tE4h7d7nk=
+github.com/kzdv/types v0.0.0-20220625055156-c5a02eea21d1 h1:xnLmJqV4C0genYd/Und32wphS1Br+39eLtYPwZFQSEw=
+github.com/kzdv/types v0.0.0-20220625055156-c5a02eea21d1/go.mod h1:KCVtHpRxBldhoguu9pDby3iQ+hmvOsPNB1tE4h7d7nk=
 github.com/leodido/go-urn v1.2.1 h1:BqpAaACuzVSgi/VLzGZIobT2z4v53pjosyNd9Yv6n/w=
 github.com/leodido/go-urn v1.2.1/go.mod h1:zt4jvISO2HfUBqxjfIshjdMTYS56ZS/qv49ictyFfxY=
 github.com/lestrrat-go/backoff/v2 v2.0.8 h1:oNb5E5isby2kiro9AgdHLv5N5tint1AnDVVf2E2un5A=
