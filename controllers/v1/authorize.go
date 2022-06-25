@@ -109,7 +109,7 @@ func GetAuthorize(c *gin.Context) {
 			host = c.Request.Host
 		}
 		log4g.Category("test").Debug(host) */
-	c.SetCookie("sso_token", login.Token, int(time.Minute)*5, "/", host, false, true)
+	c.SetCookie("sso_token", login.Token, int(time.Minute)*5, "/", c.Request.Host, false, true)
 
 	//redirect_url := fmt.Sprintf("https://login.vatusa.net/uls/v2/login?fac=%s&url=%s&rfc7519_compliance", utils.Getenv("ULS_FACILITY_ID", "ZAU"), utils.Getenv("ULS_REDIRECT_ID", "1"))
 
@@ -119,7 +119,7 @@ func GetAuthorize(c *gin.Context) {
 		os.Getenv("VATSIM_AUTHORIZE_PATH"),
 		os.Getenv("VATSIM_OAUTH_CLIENT_ID"),
 		returnUri,
-		os.Getenv("VATSIM_OAUTH_SCOPES")
+		os.Getenv("VATSIM_OAUTH_SCOPES"),
 	)
 
 	c.Redirect(http.StatusTemporaryRedirect, vatsim_url)
