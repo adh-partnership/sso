@@ -158,6 +158,7 @@ func GetCallback(c *gin.Context) {
 	userResult := <-result
 
 	if userResult.err != nil {
+		log4g.Category("controllers/callback").Error("Error getting user from Vatsim: %s", userResult.err.Error())
 		handleError(c, "Internal Error while getting user data from VATSIM Connect")
 		return
 	}
