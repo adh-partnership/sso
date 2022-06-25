@@ -37,7 +37,7 @@ import (
 )
 
 type Result struct {
-	cid int
+	cid string
 	err error
 }
 
@@ -178,7 +178,7 @@ func GetCallback(c *gin.Context) {
 	}
 
 	user := &dbTypes.User{}
-	if err = models.DB.First(&user, userResult.cid).Error; err != nil {
+	if err = models.DB.Where(&dbTypes.User{CID: uint(atoi(userResult.cid))}).Find(&user).Error; err != nil {
 		handleError(c, "You are not part of our roster, so you are unable to login.")
 		return
 	}
