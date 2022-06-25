@@ -27,6 +27,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -99,6 +100,7 @@ func GetCallback(c *gin.Context) {
 			"redirect_uri":  returnUri,
 			"client_id":     atoi(os.Getenv("VATSIM_OAUTH_CLIENT_ID")),
 			"client_secret": os.Getenv("VATSIM_OAUTH_CLIENT_SECRET"),
+			"scopes":        strings.Split(os.Getenv("VATSIM_OAUTH_SCOPES"), " "),
 		}
 
 		json_data, err := json.Marshal(data)
