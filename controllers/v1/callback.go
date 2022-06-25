@@ -26,6 +26,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -92,11 +93,11 @@ func GetCallback(c *gin.Context) {
 	go func() {
 		tokenUrl := fmt.Sprintf("%s%s", os.Getenv("VATSIM_BASE_URL"), os.Getenv("VATSIM_TOKEN_PATH"))
 
-		data := map[string]string{
+		data := map[string]interface{}{
 			"grant_type":    "authorization_code",
 			"code":          code,
 			"redirect_uri":  returnUri,
-			"client_id":     os.Getenv("VATSIM_OAUTH_CLIENT_ID"),
+			"client_id":     atoi(os.Getenv("VATSIM_OAUTH_CLIENT_ID")),
 			"client_secret": os.Getenv("VATSIM_OAUTH_CLIENT_SECRET"),
 		}
 
@@ -177,4 +178,9 @@ func GetCallback(c *gin.Context) {
 	models.DB.Save(&login)
 
 	c.Redirect(302, fmt.Sprintf("%s?code=%s&state=%s", login.RedirectURI, login.Code, login.State))
+}
+
+func atoi(s string) int {
+	i, _ := strconv.Atoi(s)
+	return i
 }
