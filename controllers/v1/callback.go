@@ -104,7 +104,7 @@ func GetCallback(c *gin.Context) {
 			result <- Result{err: err}
 			return
 		}
-
+		log4g.Category("controllers/callback").Debug("Sending request to %s with data %s", tokenUrl, string(json_data))
 		request, err := http.Post(tokenUrl, "application/json", bytes.NewBuffer(json_data))
 		if err != nil {
 			result <- Result{err: err}
