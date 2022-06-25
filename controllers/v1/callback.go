@@ -112,6 +112,7 @@ func GetCallback(c *gin.Context) {
 		}
 		defer request.Body.Close()
 		body, err := ioutil.ReadAll(request.Body)
+		log4g.Category("controllers/callback").Debug("VATSIM response: %s", string(body))
 		if err != nil {
 			result <- Result{err: err}
 			return
@@ -141,6 +142,7 @@ func GetCallback(c *gin.Context) {
 		}
 		defer userResponse.Body.Close()
 		userBody, err := ioutil.ReadAll(userResponse.Body)
+		log4g.Category("controllers/callback").Debug("VATSIM User Info response: %s", string(userBody))
 		if err != nil {
 			result <- Result{err: err}
 			return
