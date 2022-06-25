@@ -139,12 +139,19 @@ func PostToken(c *gin.Context) {
 		log4g.Category("controllers/token").Error("Could not find current key in JWKs")
 		return
 	}
+
+	var roles []string
+	for _, role := range user.Roles {
+		roles = append(roles, role.Name)
+	}
+
 	token := jwt.New()
 	token.Set(jwt.IssuerKey, utils.Getenv("SSO_ISSUERKEY", "auth.denartcc.org"))
 	token.Set(jwt.AudienceKey, login.Client.Name)
 	token.Set(jwt.SubjectKey, fmt.Sprint(login.CID))
 	token.Set(jwt.IssuedAtKey, time.Now())
 	token.Set(jwt.ExpirationKey, time.Now().Add(time.Duration(login.Client.TTL)*time.Second).Unix())
+	token.Set("roles", roles)
 	signed, err := jwt.Sign(token, jwa.SignatureAlgorithm(key.Algorithm()), key)
 	if err != nil {
 		log4g.Category("controllers/token").Error("Failed to create JWT: " + err.Error())
@@ -170,7 +177,7 @@ func PostToken(c *gin.Context) {
 		token.Set("name", fmt.Sprintf("%s %s", user.FirstName, user.LastName))
 		token.Set("given_name", user.FirstName)
 		token.Set("family_name", user.LastName)
-		token.Set("roles", user.Roles)
+		token.Set("roles", roles)
 		idsigned, err := jwt.Sign(token, jwa.SignatureAlgorithm(key.Algorithm()), key)
 		if err != nil {
 			log4g.Category("controllers/token").Error("Failed to create JWT: " + err.Error())
