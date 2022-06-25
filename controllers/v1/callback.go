@@ -107,7 +107,6 @@ func GetCallback(c *gin.Context) {
 			result <- Result{err: err}
 			return
 		}
-		log4g.Category("controllers/callback").Debug("Sending request to %s with data %s", tokenUrl, string(json_data))
 		request, err := http.Post(tokenUrl, "application/json", bytes.NewBuffer(json_data))
 		if err != nil {
 			result <- Result{err: err}
@@ -115,11 +114,16 @@ func GetCallback(c *gin.Context) {
 		}
 		defer request.Body.Close()
 		body, err := ioutil.ReadAll(request.Body)
-		log4g.Category("controllers/callback").Debug("VATSIM response: %s", string(body))
 		if err != nil {
 			result <- Result{err: err}
 			return
 		}
+
+		if request.StatusCode > 399 {
+			result <- Result{err: fmt.Errorf("error %d received from vatsim: %s", request.StatusCode, string(body))}
+			return
+		}
+
 		accessToken := &VatsimAccessToken{}
 		if err = json.Unmarshal(body, accessToken); err != nil {
 			result <- Result{err: err}
@@ -127,11 +131,11 @@ func GetCallback(c *gin.Context) {
 		}
 
 		if accessToken.AccessToken == "" {
-			result <- Result{err: fmt.Errorf("No access token received")}
+			result <- Result{err: fmt.Errorf("no access token received")}
 			return
 		}
 
-		userRequest, err := http.NewRequest("GET", fmt.Sprintf("%s%s", os.Getenv("VATSIM_BASE_URL"), os.Getenv("VATSIM_USER_PATH")), nil)
+		userRequest, err := http.NewRequest("GET", fmt.Sprintf("%s%s", os.Getenv("VATSIM_BASE_URL"), os.Getenv("VATSIM_USER_INFO_PATH")), nil)
 		userRequest.Header.Add("Authorization", fmt.Sprintf("Bearer %s", accessToken.AccessToken))
 		if err != nil {
 			result <- Result{err: err}
@@ -144,10 +148,15 @@ func GetCallback(c *gin.Context) {
 			return
 		}
 		defer userResponse.Body.Close()
+
 		userBody, err := ioutil.ReadAll(userResponse.Body)
-		log4g.Category("controllers/callback").Debug("VATSIM User Info response: %s", string(userBody))
 		if err != nil {
 			result <- Result{err: err}
+			return
+		}
+
+		if userResponse.StatusCode > 399 {
+			result <- Result{err: fmt.Errorf("error %d received from vatsim: %s", userResponse.StatusCode, string(userBody))}
 			return
 		}
 
