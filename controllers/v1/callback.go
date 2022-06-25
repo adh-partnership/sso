@@ -85,10 +85,7 @@ func GetCallback(c *gin.Context) {
 		return
 	}
 
-	scheme := "http"
-	if c.Request.TLS != nil && c.Request.TLS.HandshakeComplete {
-		scheme = "https"
-	}
+	scheme := "https"
 	returnUri := url.QueryEscape(fmt.Sprintf("%s://%s/oauth/callback", scheme, c.Request.Host))
 
 	result := make(chan Result)
