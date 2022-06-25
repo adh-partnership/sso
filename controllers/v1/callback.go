@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -88,7 +87,7 @@ func GetCallback(c *gin.Context) {
 	}
 
 	scheme := "https"
-	returnUri := url.QueryEscape(fmt.Sprintf("%s://%s/oauth/callback", scheme, c.Request.Host))
+	returnUri := fmt.Sprintf("%s://%s/oauth/callback", scheme, c.Request.Host)
 
 	result := make(chan Result)
 	go func() {

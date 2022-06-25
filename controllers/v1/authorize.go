@@ -116,7 +116,7 @@ func GetAuthorize(c *gin.Context) {
 		os.Getenv("VATSIM_AUTHORIZE_PATH"),
 		os.Getenv("VATSIM_OAUTH_CLIENT_ID"),
 		returnUri,
-		os.Getenv("VATSIM_OAUTH_SCOPES"),
+		url.QueryEscape(os.Getenv("VATSIM_OAUTH_SCOPES")),
 	)
 
 	c.Redirect(http.StatusTemporaryRedirect, vatsim_url)
