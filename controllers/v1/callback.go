@@ -42,7 +42,7 @@ type Result struct {
 }
 
 type UserResponse struct {
-	CID      int                  `json:"cid"`
+	CID      string               `json:"cid"`
 	Personal UserResponsePersonal `json:"personal"`
 }
 
