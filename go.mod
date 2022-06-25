@@ -9,7 +9,7 @@ require (
 	github.com/go-playground/validator/v10 v10.11.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/joho/godotenv v1.4.0
-	github.com/kzdv/types v0.0.0-20220620194852-b4093996441b
+	github.com/kzdv/types v0.0.0-20220625054431-22c3bd3924bc
 	github.com/lestrrat-go/blackmagic v1.0.1 // indirect
 	github.com/lestrrat-go/iter v1.0.2 // indirect
 	github.com/lestrrat-go/jwx v1.2.25
