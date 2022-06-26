@@ -33,6 +33,7 @@ import (
 	"github.com/kzdv/sso/database/models"
 	dbTypes "github.com/kzdv/types/database"
 	gonanoid "github.com/matoous/go-nanoid/v2"
+	"gorm.io/gorm"
 	"hawton.dev/log4g"
 )
 
@@ -189,38 +190,46 @@ func GetCallback(c *gin.Context) {
 		return
 	}
 
+	log4g.Category("controllers/callback").Debug("Got user from Vatsim: %+v", userResult.UserResponse)
 	user := &dbTypes.User{}
 	if err = models.DB.Where(&dbTypes.User{CID: uint(atoi(userResult.UserResponse.CID))}).Find(&user).Error; err != nil {
-		// @TODO: Move this to an API package when the new monolith API is written
-		go func(user UserResponse) {
-			rating := &dbTypes.Rating{}
-			if err := models.DB.Where(&dbTypes.Rating{ID: user.Vatsim.Rating.ID}).Find(&rating).Error; err != nil {
-				log4g.Category("controllers/callback").Error("Error getting rating from db: %s", err.Error())
-				return
-			}
+		if err == gorm.ErrRecordNotFound {
+			log4g.Category("controllers/callback").Debug("User not found in db, creating new user")
+			// @TODO: Move this to an API package when the new monolith API is written
+			go func(user UserResponse) {
+				rating := &dbTypes.Rating{}
+				if err := models.DB.Where(&dbTypes.Rating{ID: user.Vatsim.Rating.ID}).Find(&rating).Error; err != nil {
+					log4g.Category("controllers/callback").Error("Error getting rating from db: %s", err.Error())
+					return
+				}
 
-			newUser := &dbTypes.User{
-				CID:              uint(atoi(user.CID)),
-				FirstName:        user.Personal.FirstName,
-				LastName:         user.Personal.LastName,
-				Email:            user.Personal.Email,
-				ControllerType:   dbTypes.ControllerTypeOptions["none"],
-				DelCertification: dbTypes.CertificationOptions["none"],
-				GndCertification: dbTypes.CertificationOptions["none"],
-				LclCertification: dbTypes.CertificationOptions["none"],
-				AppCertification: dbTypes.CertificationOptions["none"],
-				CtrCertification: dbTypes.CertificationOptions["none"],
-				RatingID:         user.Vatsim.Rating.ID,
-				Rating:           *rating,
-				Status:           dbTypes.ControllerStatusOptions["none"],
-				CreatedAt:        time.Now(),
-				UpdatedAt:        time.Now(),
-			}
-			if err := models.DB.Create(&newUser).Error; err != nil {
-				log4g.Category("controllers/callback").Error("Error creating user in db: %s", err.Error())
-				return
-			}
-		}(userResult.UserResponse)
+				newUser := &dbTypes.User{
+					CID:              uint(atoi(user.CID)),
+					FirstName:        user.Personal.FirstName,
+					LastName:         user.Personal.LastName,
+					Email:            user.Personal.Email,
+					ControllerType:   dbTypes.ControllerTypeOptions["none"],
+					DelCertification: dbTypes.CertificationOptions["none"],
+					GndCertification: dbTypes.CertificationOptions["none"],
+					LclCertification: dbTypes.CertificationOptions["none"],
+					AppCertification: dbTypes.CertificationOptions["none"],
+					CtrCertification: dbTypes.CertificationOptions["none"],
+					RatingID:         user.Vatsim.Rating.ID,
+					Rating:           *rating,
+					Status:           dbTypes.ControllerStatusOptions["none"],
+					CreatedAt:        time.Now(),
+					UpdatedAt:        time.Now(),
+				}
+				if err := models.DB.Create(&newUser).Error; err != nil {
+					log4g.Category("controllers/callback").Error("Error creating user in db: %s", err.Error())
+					return
+				}
+			}(userResult.UserResponse)
+		} else {
+			log4g.Category("controllers/callback").Error("Error getting user from db: %s", err.Error())
+			handleError(c, "Internal Error while getting user data from VATSIM Connect")
+			return
+		}
 	}
 
 	login.CID = uint(atoi(userResult.UserResponse.CID))
