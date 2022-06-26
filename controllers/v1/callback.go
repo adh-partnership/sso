@@ -37,19 +37,31 @@ import (
 )
 
 type Result struct {
-	cid string
-	err error
+	UserResponse UserResponse
+	err          error
 }
 
 type UserResponse struct {
 	CID      string               `json:"cid"`
 	Personal UserResponsePersonal `json:"personal"`
+	Vatsim   VatsimDetails        `json:"vatsim"`
 }
 
 type UserResponsePersonal struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	FullName  string `json:"full_name"`
+	Email     string `json:"email"`
+}
+
+type VatsimDetails struct {
+	Rating VatsimDetailsRating `json:"rating"`
+}
+
+type VatsimDetailsRating struct {
+	ID    int    `json:"id"`
+	Long  string `json:"long"`
+	Short string `json:"short"`
 }
 
 type VatsimAccessToken struct {
@@ -166,7 +178,7 @@ func GetCallback(c *gin.Context) {
 			return
 		}
 
-		result <- Result{cid: vatsimResponse.Data.CID, err: err}
+		result <- Result{UserResponse: vatsimResponse.Data, err: err}
 	}()
 
 	userResult := <-result
@@ -178,12 +190,40 @@ func GetCallback(c *gin.Context) {
 	}
 
 	user := &dbTypes.User{}
-	if err = models.DB.Where(&dbTypes.User{CID: uint(atoi(userResult.cid))}).Find(&user).Error; err != nil {
-		handleError(c, "You are not part of our roster, so you are unable to login.")
-		return
+	if err = models.DB.Where(&dbTypes.User{CID: uint(atoi(userResult.UserResponse.CID))}).Find(&user).Error; err != nil {
+		// @TODO: Move this to an API package when the new monolith API is written
+		go func(user UserResponse) {
+			rating := &dbTypes.Rating{}
+			if err := models.DB.Where(&dbTypes.Rating{ID: user.Vatsim.Rating.ID}).Find(&rating).Error; err != nil {
+				log4g.Category("controllers/callback").Error("Error getting rating from db: %s", err.Error())
+				return
+			}
+
+			newUser := &dbTypes.User{
+				CID:              uint(atoi(user.CID)),
+				FirstName:        user.Personal.FirstName,
+				LastName:         user.Personal.LastName,
+				Email:            user.Personal.Email,
+				ControllerType:   dbTypes.ControllerTypeOptions["none"],
+				DelCertification: dbTypes.CertificationOptions["none"],
+				GndCertification: dbTypes.CertificationOptions["none"],
+				LclCertification: dbTypes.CertificationOptions["none"],
+				AppCertification: dbTypes.CertificationOptions["none"],
+				CtrCertification: dbTypes.CertificationOptions["none"],
+				RatingID:         user.Vatsim.Rating.ID,
+				Rating:           *rating,
+				Status:           dbTypes.ControllerStatusOptions["none"],
+				CreatedAt:        time.Now(),
+				UpdatedAt:        time.Now(),
+			}
+			if err := models.DB.Create(&newUser).Error; err != nil {
+				log4g.Category("controllers/callback").Error("Error creating user in db: %s", err.Error())
+				return
+			}
+		}(userResult.UserResponse)
 	}
 
-	login.CID = user.CID
+	login.CID = uint(atoi(userResult.UserResponse.CID))
 	login.Code, _ = gonanoid.New(32)
 	models.DB.Save(&login)
 
