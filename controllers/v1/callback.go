@@ -50,9 +50,9 @@ type UserResponse struct {
 }
 
 type UserResponsePersonal struct {
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	FullName  string `json:"full_name"`
+	FirstName string `json:"name_first"`
+	LastName  string `json:"name_last"`
+	FullName  string `json:"name_full"`
 	Email     string `json:"email"`
 }
 
