@@ -21,6 +21,7 @@ package v1
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -192,13 +193,13 @@ func GetCallback(c *gin.Context) {
 
 	log4g.Category("controllers/callback").Debug("Got user from Vatsim: %+v", userResult.UserResponse)
 	user := &dbTypes.User{}
-	if err = models.DB.Where(&dbTypes.User{CID: uint(atoi(userResult.UserResponse.CID))}).Find(&user).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
+	if err = models.DB.Where(&dbTypes.User{CID: uint(atoi(userResult.UserResponse.CID))}).First(&user).Error; err != nil {
+		if errors.Is(gorm.ErrRecordNotFound, err) {
 			log4g.Category("controllers/callback").Debug("User not found in db, creating new user")
 			// @TODO: Move this to an API package when the new monolith API is written
 			go func(user UserResponse) {
 				rating := &dbTypes.Rating{}
-				if err := models.DB.Where(&dbTypes.Rating{ID: user.Vatsim.Rating.ID}).Find(&rating).Error; err != nil {
+				if err := models.DB.Where(&dbTypes.Rating{ID: user.Vatsim.Rating.ID}).First(&rating).Error; err != nil {
 					log4g.Category("controllers/callback").Error("Error getting rating from db: %s", err.Error())
 					return
 				}
