@@ -232,6 +232,8 @@ func GetCallback(c *gin.Context) {
 		}
 	}
 
+	log4g.Category("controllers/callback").Debug("Got user from db: %+v", user)
+
 	login.CID = uint(atoi(userResult.UserResponse.CID))
 	login.Code, _ = gonanoid.New(32)
 	models.DB.Save(&login)
