@@ -82,7 +82,9 @@ func GetAuthorize(c *gin.Context) {
 
 	login := dbTypes.OAuthLogin{
 		Token:               token,
+		Nonce:               c.Param("nonce"),
 		UserAgent:           c.Request.UserAgent(),
+		IP:                  c.ClientIP(),
 		RedirectURI:         req.RedirectURI,
 		Client:              client,
 		ClientID:            client.ID,
@@ -90,6 +92,7 @@ func GetAuthorize(c *gin.Context) {
 		CodeChallenge:       req.CodeChallenge,
 		CodeChallengeMethod: req.CodeChallengeMethod,
 		Scope:               req.Scope,
+		ExpiresAt:           time.Now().Add(time.Minute * 5),
 	}
 
 	if err = models.DB.Create(&login).Error; err != nil {

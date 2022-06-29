@@ -52,6 +52,10 @@ github.com/kzdv/types v0.0.0-20220625054431-22c3bd3924bc h1:P2d6GMNn23/KfoF1Cl5x
 github.com/kzdv/types v0.0.0-20220625054431-22c3bd3924bc/go.mod h1:KCVtHpRxBldhoguu9pDby3iQ+hmvOsPNB1tE4h7d7nk=
 github.com/kzdv/types v0.0.0-20220625055156-c5a02eea21d1 h1:xnLmJqV4C0genYd/Und32wphS1Br+39eLtYPwZFQSEw=
 github.com/kzdv/types v0.0.0-20220625055156-c5a02eea21d1/go.mod h1:KCVtHpRxBldhoguu9pDby3iQ+hmvOsPNB1tE4h7d7nk=
+github.com/kzdv/types v0.0.0-20220628154958-369ed6bdfee8 h1:H99UZwDw+bueyQsGcA5Mutsra5VZRXEG0rMHyXWWk6o=
+github.com/kzdv/types v0.0.0-20220628154958-369ed6bdfee8/go.mod h1:KCVtHpRxBldhoguu9pDby3iQ+hmvOsPNB1tE4h7d7nk=
+github.com/kzdv/types v0.0.0-20220629011734-648b48b256b2 h1:pxfj3QSHzZO0Kl4GOKteb6kwV+QJy2u8f43+0KCgr94=
+github.com/kzdv/types v0.0.0-20220629011734-648b48b256b2/go.mod h1:KCVtHpRxBldhoguu9pDby3iQ+hmvOsPNB1tE4h7d7nk=
 github.com/leodido/go-urn v1.2.1 h1:BqpAaACuzVSgi/VLzGZIobT2z4v53pjosyNd9Yv6n/w=
 github.com/leodido/go-urn v1.2.1/go.mod h1:zt4jvISO2HfUBqxjfIshjdMTYS56ZS/qv49ictyFfxY=
 github.com/lestrrat-go/backoff/v2 v2.0.8 h1:oNb5E5isby2kiro9AgdHLv5N5tint1AnDVVf2E2un5A=
@@ -61,11 +65,15 @@ github.com/lestrrat-go/blackmagic v1.0.1 h1:lS5Zts+5HIC/8og6cGHb0uCcNCa3OUt1ygh3
 github.com/lestrrat-go/blackmagic v1.0.1/go.mod h1:UrEqBzIR2U6CnzVyUtfM6oZNMt/7O7Vohk2J0OGSAtU=
 github.com/lestrrat-go/httpcc v1.0.1 h1:ydWCStUeJLkpYyjLDHihupbn2tYmZ7m22BGkcvZZrIE=
 github.com/lestrrat-go/httpcc v1.0.1/go.mod h1:qiltp3Mt56+55GPVCbTdM9MlqhvzyuL6W/NMDA8vA5E=
+github.com/lestrrat-go/httprc v1.0.2 h1:1hPZNeBRt9cvvYFR83XTkoQQidSFmAj3dqgR3AuQj9U=
+github.com/lestrrat-go/httprc v1.0.2/go.mod h1:5Ml+nB++j6IC0e6LzefJnrpMQDKgDwDCaIQQzhbqhJM=
 github.com/lestrrat-go/iter v1.0.1/go.mod h1:zIdgO1mRKhn8l9vrZJZz9TUMMFbQbLeTsbqPDrJ/OJc=
 github.com/lestrrat-go/iter v1.0.2 h1:gMXo1q4c2pHmC3dn8LzRhJfP1ceCbgSiT9lUydIzltI=
 github.com/lestrrat-go/iter v1.0.2/go.mod h1:Momfcq3AnRlRjI5b5O8/G5/BvpzrhoFTZcn06fEOPt4=
 github.com/lestrrat-go/jwx v1.2.25 h1:tAx93jN2SdPvFn08fHNAhqFJazn5mBBOB8Zli0g0otA=
 github.com/lestrrat-go/jwx v1.2.25/go.mod h1:zoNuZymNl5lgdcu6P7K6ie2QRll5HVfF4xwxBBK1NxY=
+github.com/lestrrat-go/jwx/v2 v2.0.3 h1:9zeZGkbiVkiSuzRsy2SbQJdTuA/At1I2Hh9R/GonCKg=
+github.com/lestrrat-go/jwx/v2 v2.0.3/go.mod h1:4tnab1l/rJWhxmtVsAtc2kr+pWGg72IcnWFk8gM0tLM=
 github.com/lestrrat-go/option v1.0.0 h1:WqAWL8kh8VcSoD6xjSH34/1m8yxluXQbDeKNfvFeEO4=
 github.com/lestrrat-go/option v1.0.0/go.mod h1:5ZHFbivi4xwXxhxY9XHDe2FHo6/Z7WWmtT7T5nBBp3I=
 github.com/matoous/go-nanoid v1.5.0 h1:VRorl6uCngneC4oUQqOYtO3S0H5QKFtKuKycFG3euek=
@@ -127,6 +135,8 @@ golang.org/x/sys v0.0.0-20220615213510-4f61da869c0c h1:aFV+BgZ4svzjfabn8ERpuB4JI
 golang.org/x/sys v0.0.0-20220615213510-4f61da869c0c/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220624220833-87e55d714810 h1:rHZQSjJdAI4Xf5Qzeh2bBc5YJIkPFVM6oDtMFYmgws0=
 golang.org/x/sys v0.0.0-20220624220833-87e55d714810/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20220627191245-f75cf1eec38b h1:2n253B2r0pYSmEV+UNCQoPfU/FiaizQEK5Gu4Bq4JE8=
+golang.org/x/sys v0.0.0-20220627191245-f75cf1eec38b/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/term v0.0.0-20210927222741-03fcf44c2211/go.mod h1:jbD1KX2456YbFQfuXm/mYQcufACuNUgVhRMnK/tPxf8=
 golang.org/x/text v0.3.3/go.mod h1:5Zoc/QRtKVWzQhOtBMvqHzDpF6irO9z98xDceosuGiQ=
