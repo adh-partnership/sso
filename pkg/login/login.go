@@ -5,16 +5,16 @@ import (
 	"strings"
 	"time"
 
+	dbTypes "github.com/kzdv/api/pkg/database/types"
 	"github.com/kzdv/sso/database/models"
 	"github.com/kzdv/sso/pkg/pkce"
-	dbTypes "github.com/kzdv/types/database"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"gorm.io/gorm/clause"
 )
 
 type TokenRequest struct {
 	GrantType    string   `form:"grant_type" json:"grant_type"`
-	ClientId     string   `form:"client_id" json:"client_id"`
+	ClientID     string   `form:"client_id" json:"client_id"`
 	ClientSecret string   `form:"client_secret" json:"client_secret"`
 	RefreshToken string   `form:"refresh_token" json:"refresh_token"`
 	Code         string   `form:"code" json:"code"`
@@ -50,7 +50,7 @@ func AuthorizationCode(req TokenRequest) (*dbTypes.OAuthLogin, *dbTypes.User, er
 	}
 	defer models.DB.Delete(&login)
 
-	if req.ClientId != login.Client.ClientId || req.ClientSecret != login.Client.ClientSecret {
+	if req.ClientID != login.Client.ClientID || req.ClientSecret != login.Client.ClientSecret {
 		return nil, nil, ErrInvalidClient
 	}
 
@@ -80,7 +80,7 @@ func RefreshToken(req TokenRequest) (*dbTypes.OAuthLogin, *dbTypes.User, error) 
 	}
 	defer models.DB.Delete(&login)
 
-	if req.ClientId != login.Client.ClientId || req.ClientSecret != login.Client.ClientSecret {
+	if req.ClientID != login.Client.ClientID || req.ClientSecret != login.Client.ClientSecret {
 		return nil, nil, ErrInvalidClient
 	}
 

@@ -19,17 +19,31 @@
 package v1
 
 import (
+	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kzdv/sso/pkg/login"
+	dbTypes "github.com/kzdv/api/pkg/database/types"
+	"github.com/kzdv/sso/database/models"
+	loginpkg "github.com/kzdv/sso/pkg/login"
 	"github.com/kzdv/sso/pkg/tokens"
 	utils "github.com/kzdv/sso/pkg/utils"
 	"hawton.dev/log4g"
 )
+
+type TokenRequest struct {
+	GrantType    string   `form:"grant_type"`
+	ClientID     string   `form:"client_id"`
+	ClientSecret string   `form:"client_secret"`
+	Code         string   `form:"code"`
+	RedirectURI  string   `form:"redirect_uri"`
+	CodeVerifier string   `form:"code_verifier"`
+	ResponseType string   `form:"response_type"`
+	Scope        []string `form:"scope"`
+}
 
 type TokenResponse struct {
 	AccessToken         string `json:"access_token"`
@@ -42,17 +56,55 @@ type TokenResponse struct {
 }
 
 func PostToken(c *gin.Context) {
-	treq := login.TokenRequest{}
+	treq := loginpkg.TokenRequest{}
 	if err := c.ShouldBind(&treq); err != nil {
 		log4g.Category("controllers/token").Error("Invalid request, missing field(s)")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_request"})
 		return
 	}
 
-	if treq.ClientId == "" || treq.ClientSecret == "" {
-		if c.GetHeader("Authorization") == "" {
-			log4g.Category("controllers/token").Error("Invalid request, missing field(s)")
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_request"})
+	if treq.GrantType != "authorization_code" {
+		log4g.Category("controllers/token").Error("Grant type is not authorization code")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_grant"})
+		return
+	}
+
+	login := dbTypes.OAuthLogin{}
+	if err := models.DB.Joins("Client").Where("code = ?", treq.Code).First(&login).Error; err != nil {
+		log4g.Category("controllers/token").Error(fmt.Sprintf("Code %s not found", treq.Code))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_request"})
+		return
+	}
+
+	defer models.DB.Delete(&login)
+
+	if treq.ClientID == "" || treq.ClientSecret == "" {
+		// Not in query string, let's grab from Authorization header
+		auth := c.Request.Header.Get("Authorization")
+		if auth == "" {
+			log4g.Category("controllers/token").Error("Invalid client: no creds passed.")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_client"})
+			return
+		}
+
+		if fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", login.Client.ClientID, login.Client.ClientSecret)))) != auth {
+			log4g.Category("controllers/token").Error("Invalid client: creds did not match.")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_client"})
+			return
+		}
+	}
+
+	if treq.ClientID != login.Client.ClientID || treq.ClientSecret != login.Client.ClientSecret {
+		log4g.Category("controllers/token").Error(fmt.Sprintf("Invalid client: %s does not match %s", treq.ClientID, login.Client.ClientID))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_client"})
+		return
+	}
+
+	if login.CodeChallengeMethod == "S256" {
+		hash := sha256.Sum256([]byte(treq.CodeVerifier))
+		if login.CodeChallenge != base64.RawURLEncoding.EncodeToString(hash[:]) {
+			log4g.Category("controllers/token").Error("Code Challenge failed")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_grant"})
 			return
 		} else {
 			auth := strings.Split(c.GetHeader("Authorization"), " ")[1]
@@ -63,12 +115,12 @@ func PostToken(c *gin.Context) {
 				return
 			}
 			authslice := strings.SplitN(string(authBytes), ":", 2)
-			treq.ClientId = authslice[0]
+			treq.ClientID = authslice[0]
 			treq.ClientSecret = authslice[1]
 		}
 	}
 
-	l, user, err := login.HandleGrantType(treq)
+	l, user, err := loginpkg.HandleGrantType(treq)
 	if err != nil {
 		log4g.Category("controllers/token").Error(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -131,9 +183,9 @@ func PostToken(c *gin.Context) {
 		}
 		ret.IdToken = string(idtoken)
 	}
-	ret.RefreshToken, err = login.CreateRefreshToken(l, user)
+	ret.RefreshToken, err = loginpkg.CreateRefreshToken(l, user)
 
-	_, err = login.CleanupAuthorization(treq)
+	_, err = loginpkg.CleanupAuthorization(treq)
 	if err != nil {
 		log4g.Category("controllers/token").Error("Error cleaning up authorization: %s", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

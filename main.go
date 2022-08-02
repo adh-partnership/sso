@@ -25,11 +25,11 @@ import (
 	"github.com/common-nighthawk/go-figure"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	dbTypes "github.com/kzdv/api/pkg/database/types"
 	"github.com/kzdv/sso/database/models"
 	"github.com/kzdv/sso/database/seed"
 	"github.com/kzdv/sso/pkg/tokens"
 	"github.com/kzdv/sso/utils"
-	dbTypes "github.com/kzdv/types/database"
 	"github.com/robfig/cron/v3"
 	"hawton.dev/log4g"
 )
