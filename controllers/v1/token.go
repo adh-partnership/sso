@@ -58,7 +58,7 @@ type TokenResponse struct {
 func PostToken(c *gin.Context) {
 	treq := loginpkg.TokenRequest{}
 	if err := c.ShouldBind(&treq); err != nil {
-		log4g.Category("controllers/token").Error("Invalid request, missing field(s)")
+		log4g.Category("controllers/token").Error("Invalid request, missing field(s): %+v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_request"})
 		return
 	}

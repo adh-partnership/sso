@@ -120,6 +120,11 @@ func GetCallback(c *gin.Context) {
 			"scopes":        strings.Split(os.Getenv("VATSIM_OAUTH_SCOPES"), " "),
 		}
 
+		// VATSIM wants this as an int, the RFC says string
+		if os.Getenv("VATSIM_USER_INFO_FORMAT") != "vatsim" {
+			data["client_id"] = os.Getenv("VATSIM_OAUTH_CLIENT_ID")
+		}
+
 		json_data, err := json.Marshal(data)
 		if err != nil {
 			result <- Result{err: err}
