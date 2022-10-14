@@ -21,9 +21,9 @@ package main
 import (
 	"net/http"
 
+	v1 "github.com/adh-partnership/sso/controllers/v1"
+	jwtMiddleware "github.com/adh-partnership/sso/middleware/jwt"
 	"github.com/gin-gonic/gin"
-	v1 "github.com/kzdv/sso/controllers/v1"
-	jwtMiddleware "github.com/kzdv/sso/middleware/jwt"
 )
 
 func SetupRoutes(engine *gin.Engine) {

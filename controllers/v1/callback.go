@@ -30,9 +30,9 @@ import (
 	"strings"
 	"time"
 
+	dbTypes "github.com/adh-partnership/api/pkg/database/models"
+	"github.com/adh-partnership/sso/database/models"
 	"github.com/gin-gonic/gin"
-	dbTypes "github.com/kzdv/api/pkg/database/types"
-	"github.com/kzdv/sso/database/models"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"gorm.io/gorm"
 	"hawton.dev/log4g"
@@ -72,6 +72,10 @@ type VatsimAccessToken struct {
 
 type VatsimResponse struct {
 	Data UserResponse `json:"data"`
+}
+
+type SSOResponse struct {
+	User *dbTypes.User `json:"user"`
 }
 
 func GetCallback(c *gin.Context) {
@@ -174,13 +178,42 @@ func GetCallback(c *gin.Context) {
 			return
 		}
 
-		vatsimResponse := &VatsimResponse{}
-		if err = json.Unmarshal(userBody, vatsimResponse); err != nil {
-			result <- Result{err: err}
-			return
-		}
+		if os.Getenv("VATSIM_USER_INFO_FORMAT") == "vatsim" {
+			vatsimResponse := &VatsimResponse{}
+			if err = json.Unmarshal(userBody, vatsimResponse); err != nil {
+				result <- Result{err: err}
+				return
+			}
 
-		result <- Result{UserResponse: vatsimResponse.Data, err: err}
+			result <- Result{UserResponse: vatsimResponse.Data, err: err}
+		} else {
+			ssoresponse := &SSOResponse{}
+			if err = json.Unmarshal(userBody, ssoresponse); err != nil {
+				result <- Result{err: err}
+				return
+			}
+
+			resp := &VatsimResponse{
+				Data: UserResponse{
+					CID: fmt.Sprint(ssoresponse.User.CID),
+					Personal: UserResponsePersonal{
+						FirstName: ssoresponse.User.FirstName,
+						LastName:  ssoresponse.User.LastName,
+						FullName:  fmt.Sprintf("%s %s", ssoresponse.User.FirstName, ssoresponse.User.LastName),
+						Email:     ssoresponse.User.Email,
+					},
+					Vatsim: VatsimDetails{
+						Rating: VatsimDetailsRating{
+							ID:    ssoresponse.User.RatingID,
+							Short: ssoresponse.User.Rating.Short,
+							Long:  ssoresponse.User.Rating.Long,
+						},
+					},
+				},
+			}
+
+			result <- Result{UserResponse: resp.Data, err: err}
+		}
 	}()
 
 	userResult := <-result
@@ -205,21 +238,23 @@ func GetCallback(c *gin.Context) {
 				}
 
 				newUser := &dbTypes.User{
-					CID:              uint(atoi(user.CID)),
-					FirstName:        user.Personal.FirstName,
-					LastName:         user.Personal.LastName,
-					Email:            user.Personal.Email,
-					ControllerType:   dbTypes.ControllerTypeOptions["none"],
-					DelCertification: dbTypes.CertificationOptions["none"],
-					GndCertification: dbTypes.CertificationOptions["none"],
-					LclCertification: dbTypes.CertificationOptions["none"],
-					AppCertification: dbTypes.CertificationOptions["none"],
-					CtrCertification: dbTypes.CertificationOptions["none"],
-					RatingID:         user.Vatsim.Rating.ID,
-					Rating:           *rating,
-					Status:           dbTypes.ControllerStatusOptions["none"],
-					CreatedAt:        time.Now(),
-					UpdatedAt:        time.Now(),
+					CID:                   uint(atoi(user.CID)),
+					FirstName:             user.Personal.FirstName,
+					LastName:              user.Personal.LastName,
+					Email:                 user.Personal.Email,
+					ControllerType:        dbTypes.ControllerTypeOptions["none"],
+					GndCertification:      dbTypes.CertificationOptions["none"],
+					MajorGndCertification: dbTypes.CertificationOptions["none"],
+					LclCertification:      dbTypes.CertificationOptions["none"],
+					MajorLclCertification: dbTypes.CertificationOptions["none"],
+					AppCertification:      dbTypes.CertificationOptions["none"],
+					MajorAppCertification: dbTypes.CertificationOptions["none"],
+					CtrCertification:      dbTypes.CertificationOptions["none"],
+					RatingID:              user.Vatsim.Rating.ID,
+					Rating:                *rating,
+					Status:                dbTypes.ControllerStatusOptions["none"],
+					CreatedAt:             time.Now(),
+					UpdatedAt:             time.Now(),
 				}
 				if err := models.DB.Create(&newUser).Error; err != nil {
 					log4g.Category("controllers/callback").Error("Error creating user in db: %s", err.Error())

@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"time"
 
-	dbTypes "github.com/kzdv/api/pkg/database/types"
+	dbTypes "github.com/adh-partnership/api/pkg/database/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"hawton.dev/log4g"

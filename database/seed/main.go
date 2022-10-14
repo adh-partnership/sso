@@ -21,8 +21,8 @@ package seed
 import (
 	"errors"
 
-	dbTypes "github.com/kzdv/api/pkg/database/types"
-	"github.com/kzdv/sso/database/models"
+	dbTypes "github.com/adh-partnership/api/pkg/database/models"
+	"github.com/adh-partnership/sso/database/models"
 	"gorm.io/gorm"
 	"hawton.dev/log4g"
 )

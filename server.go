@@ -19,8 +19,8 @@
 package main
 
 import (
+	"github.com/adh-partnership/sso/middleware"
 	"github.com/gin-gonic/gin"
-	"github.com/kzdv/sso/middleware"
 )
 
 type Server struct {

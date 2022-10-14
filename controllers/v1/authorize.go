@@ -25,9 +25,9 @@ import (
 	"os"
 	"time"
 
+	dbTypes "github.com/adh-partnership/api/pkg/database/models"
+	"github.com/adh-partnership/sso/database/models"
 	"github.com/gin-gonic/gin"
-	dbTypes "github.com/kzdv/api/pkg/database/types"
-	"github.com/kzdv/sso/database/models"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"hawton.dev/log4g"
 )

@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
-	dbTypes "github.com/kzdv/api/pkg/database/types"
-	"github.com/kzdv/sso/database/models"
-	"github.com/kzdv/sso/pkg/pkce"
+	dbTypes "github.com/adh-partnership/api/pkg/database/models"
+	"github.com/adh-partnership/sso/database/models"
+	"github.com/adh-partnership/sso/pkg/pkce"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"gorm.io/gorm/clause"
 )

@@ -39,35 +39,3 @@ jobs:
         if: ${{ github.event_name == 'push' }}
         run: |-
           docker push ${{ secrets.DOCKER_USERNAME }}/$SERVICE_NAME:${{ steps.vars.outputs.branch }}
-
-      - name: Deploy image to cluster (main)
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-        uses: actions-hub/kubectl@v1.24.2
-        env:
-          KUBE_CONFIG: ${{ secrets.KUBECONFIG }}
-        with:
-          args: rollout restart deployment/auth -n prod
-      
-      - name: Deploy image to cluster (dev)
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
-        uses: actions-hub/kubectl@v1.24.2
-        env:
-          KUBE_CONFIG: ${{ secrets.KUBECONFIG }}
-        with:
-          args: rollout restart deployment/auth -n dev
-
-      - name: Wait for deployment (main)
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-        uses: actions-hub/kubectl@v1.24.2
-        env:
-          KUBE_CONFIG: ${{ secrets.KUBECONFIG }}
-        with:
-          args: rollout status deployment/auth -n prod
-
-      - name: Wait for deployment (dev)
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
-        uses: actions-hub/kubectl@v1.24.2
-        env:
-          KUBE_CONFIG: ${{ secrets.KUBECONFIG }}
-        with:
-          args: rollout status deployment/auth -n dev

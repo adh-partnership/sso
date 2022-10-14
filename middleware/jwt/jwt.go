@@ -24,9 +24,9 @@ import (
 	"os"
 	"strconv"
 
+	dbTypes "github.com/adh-partnership/api/pkg/database/models"
+	"github.com/adh-partnership/sso/database/models"
 	"github.com/gin-gonic/gin"
-	dbTypes "github.com/kzdv/api/pkg/database/types"
-	"github.com/kzdv/sso/database/models"
 	"github.com/lestrrat-go/jwx/jwk"
 	"github.com/lestrrat-go/jwx/jwt"
 	"gorm.io/gorm/clause"

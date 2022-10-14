@@ -21,8 +21,8 @@ package v1
 import (
 	"net/http"
 
+	dbTypes "github.com/adh-partnership/api/pkg/database/models"
 	"github.com/gin-gonic/gin"
-	dbTypes "github.com/kzdv/api/pkg/database/types"
 )
 
 func GetInfo(c *gin.Context) {

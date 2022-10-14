@@ -25,12 +25,12 @@ import (
 	"net/http"
 	"strings"
 
+	dbTypes "github.com/adh-partnership/api/pkg/database/models"
+	"github.com/adh-partnership/sso/database/models"
+	loginpkg "github.com/adh-partnership/sso/pkg/login"
+	"github.com/adh-partnership/sso/pkg/tokens"
+	"github.com/adh-partnership/sso/pkg/utils"
 	"github.com/gin-gonic/gin"
-	dbTypes "github.com/kzdv/api/pkg/database/types"
-	"github.com/kzdv/sso/database/models"
-	loginpkg "github.com/kzdv/sso/pkg/login"
-	"github.com/kzdv/sso/pkg/tokens"
-	"github.com/kzdv/sso/pkg/utils"
 	"hawton.dev/log4g"
 )
 
