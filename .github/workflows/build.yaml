@@ -64,7 +64,7 @@ jobs:
         kustomize-version: "4.4.1"
     - name: Update deployment
       run: |-
-        cd $GITHUB_WORKSPACE/gitops
+        cd $GITHUB_WORKSPACE/gitops/overlays/prod
         kustomize edit set image vzanartcc/$SERVICE_NAME=${{ secrets.DOCKER_USERNAME }}/$SERVICE_NAME:${{ steps.vars.outputs.sha_short }}
         git add .
         git commit -m "Update $SERVICE_NAME image"
