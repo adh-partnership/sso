@@ -69,3 +69,33 @@ jobs:
         git add .
         git commit -m "Update $SERVICE_NAME image"
         git push
+  deploy-phzh:
+    name: Update PHZH GitOps Repo
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.PAZA_GITOPS_TOKEN }}
+        repository: vphzh/gitops
+        path: gitops-phzh
+    - name: Configure git
+      run: |-
+        cd $GITHUB_WORKSPACE/gitops-phzh
+        git config user.name "${{ secrets.PAZA_GITOPS_USER }}"
+        git config user.email "${{ secrets.PAZA_GITOPS_EMAIL }}"
+    - name: Setup Kustomize
+      uses: imranismail/setup-kustomize@v1
+      with:
+        kustomize-version: "4.4.1"
+    - name: Update deployment
+      run: |-
+        HASH=`echo ${GITHUB_SHA} | cut -c1-7`
+        cd $GITHUB_WORKSPACE/gitops-phzh/overlays/prod
+        kustomize edit set image vzanartcc/$SERVICE_NAME=${{ secrets.DOCKER_USERNAME }}/$SERVICE_NAME:$HASH
+        git add .
+        git commit -m "Update $SERVICE_NAME image"
+        git push
