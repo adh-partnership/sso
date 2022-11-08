@@ -66,7 +66,20 @@ func main() {
 	}
 
 	log.Info("Connecting to database and handling migrations")
-	models.Connect(utils.Getenv("DB_USERNAME", "root"), utils.Getenv("DB_PASSWORD", "secret"), utils.Getenv("DB_HOST", "localhost"), utils.Getenv("DB_PORT", "3306"), utils.Getenv("DB_DATABASE", "zdv"))
+	models.Connect(models.DBOptions{
+		Driver:   utils.Getenv("DB_DRIVER", "mysql"),
+		Host:     utils.Getenv("DB_HOST", "localhost"),
+		Port:     utils.Getenv("DB_PORT", "3306"),
+		User:     utils.Getenv("DB_USERNAME", "root"),
+		Password: utils.Getenv("DB_PASSWORD", ""),
+		Database: utils.Getenv("DB_DATABASE", "sso"),
+
+		MaxOpenConns: 10,
+		MaxIdleConns: 1,
+
+		CACert: utils.Getenv("DB_CA_CERT", ""),
+	})
+
 	seed.CheckSeeds()
 
 	log.Info("Configuring Gin Server")

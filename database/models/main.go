@@ -19,10 +19,17 @@
 package models
 
 import (
+	"crypto/tls"
+	"crypto/x509"
+	"database/sql"
+	"encoding/base64"
+	"errors"
 	"fmt"
 	"time"
 
 	dbTypes "github.com/adh-partnership/api/pkg/database/models"
+	gomysql "github.com/go-sql-driver/mysql"
+	"github.com/imdario/mergo"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"hawton.dev/log4g"
@@ -35,23 +42,116 @@ var attempt = 1
 
 var log = log4g.Category("db")
 
-func Connect(user string, pass string, hostname string, port string, database string) {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True", user, pass, hostname, port, database)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+type DBOptions struct {
+	Driver   string
+	Host     string
+	Port     string
+	User     string
+	Password string
+	Database string
+	Options  string
 
-	if err != nil {
-		log.Error("Error connecting to database: " + err.Error())
-		if attempt < MaxAttempts {
-			log.Info(fmt.Sprintf("Attempt %d/%d Failed. Waiting %s before trying again...", attempt, MaxAttempts, DelayBetweenAttempts.String()))
-			time.Sleep(DelayBetweenAttempts)
-			attempt += 1
-			Connect(user, pass, hostname, port, database)
-			return
+	MaxOpenConns int
+	MaxIdleConns int
+
+	CACert string
+}
+
+var defaultOptions = DBOptions{
+	MaxOpenConns: 50,
+	MaxIdleConns: 10,
+}
+
+func GenerateDSN(options DBOptions) (string, error) {
+	var dsn string
+
+	if options.Driver == "mysql" {
+		tls := ""
+		if options.CACert != "" {
+			tls = "&tls=custom"
 		}
-		panic("Max attempts occured. Aborting startup.")
+		dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True%s", options.User, options.Password,
+			options.Host, options.Port, options.Database, tls)
+		if options.Options != "" {
+			dsn += "?" + options.Options
+		}
+	} else {
+		return "", fmt.Errorf("unsupported driver: %s", options.Driver)
 	}
 
-	db.AutoMigrate(&dbTypes.OAuthClient{}, &dbTypes.OAuthLogin{}, &dbTypes.Rating{}, &dbTypes.Role{}, &dbTypes.User{})
+	return dsn, nil
+}
 
-	DB = db
+func HandleCACert(driver string, cacert string) error {
+	rootCertPool := x509.NewCertPool()
+	pem, err := base64.StdEncoding.DecodeString(cacert)
+	if err != nil {
+		return err
+	}
+	if ok := rootCertPool.AppendCertsFromPEM(pem); !ok {
+		return fmt.Errorf("failed to append PEM")
+	}
+
+	// @TODO: support other drivers
+	if driver == "mysql" {
+		err := gomysql.RegisterTLSConfig("custom", &tls.Config{
+			RootCAs: rootCertPool,
+		})
+		if err != nil {
+			return errors.New("error registering tls config: " + err.Error())
+		}
+	}
+
+	return nil
+}
+
+func isValidDriver(driver string) bool {
+	return driver == "mysql"
+}
+
+func Connect(options DBOptions) error {
+	if !isValidDriver(options.Driver) {
+		return errors.New("invalid driver: " + options.Driver)
+	}
+
+	err := mergo.Merge(&options, defaultOptions)
+	if err != nil {
+		return errors.New("failed to apply defaults: " + err.Error())
+	}
+
+	if options.CACert != "" {
+		err := HandleCACert(options.Driver, options.CACert)
+		if err != nil {
+			return err
+		}
+	}
+
+	dsn, err := GenerateDSN(options)
+	if err != nil {
+		return err
+	}
+
+	var conn *sql.DB
+	if options.Driver == "mysql" {
+		conn, err = sql.Open("mysql", dsn)
+		if err != nil {
+			return err
+		}
+		DB, err = gorm.Open(mysql.New(mysql.Config{Conn: conn}), &gorm.Config{})
+		if err != nil {
+			return err
+		}
+	}
+
+	sqlDB, err := DB.DB()
+	if err != nil {
+		return err
+	}
+	sqlDB.SetMaxOpenConns(options.MaxOpenConns)
+	sqlDB.SetMaxIdleConns(options.MaxIdleConns)
+	sqlDB.SetConnMaxIdleTime(time.Minute * 5)
+
+	DB.AutoMigrate(&dbTypes.OAuthClient{}, &dbTypes.OAuthLogin{}, &dbTypes.Rating{}, &dbTypes.Role{}, &dbTypes.User{})
+
+	return nil
 }
