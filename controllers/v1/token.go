@@ -130,7 +130,7 @@ func PostToken(c *gin.Context) {
 	}
 
 	l, user, err := loginpkg.HandleGrantType(treq)
-	if err != nil {
+	if err != nil || l == nil {
 		log4g.Category("controllers/token").Error(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -154,15 +154,28 @@ func PostToken(c *gin.Context) {
 		ret.CodeChallengeMethod = l.CodeChallengeMethod
 	}
 
-	accessToken, err := tokens.CreateToken(
-		utils.Getenv("SSO_ISSUERKEY", "auth.denartcc.org"),
-		l.Client.Name,
-		fmt.Sprint(l.CID),
-		l.Client.TTL,
-		map[string]interface{}{
-			"roles": roles,
-		},
-	)
+	var accessToken []byte
+	if strings.ToLower(l.Client.Name) != "kubernetes" {
+		accessToken, err = tokens.CreateToken(
+			utils.Getenv("SSO_ISSUERKEY", "auth.denartcc.org"),
+			l.Client.Name,
+			fmt.Sprint(l.CID),
+			l.Client.TTL,
+			map[string]interface{}{
+				"roles": roles,
+			},
+		)
+	} else {
+		accessToken, err = tokens.CreateTokenKubernetes(
+			utils.Getenv("SSO_ISSUERKEY", "auth.denartcc.org"),
+			l.Client.Name,
+			fmt.Sprint(l.CID),
+			l.Client.TTL,
+			map[string]interface{}{
+				"roles": roles,
+			},
+		)
+	}
 	if err != nil {
 		log4g.Category("controllers/token").Error("Error creating access token: %s", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -192,7 +205,7 @@ func PostToken(c *gin.Context) {
 		}
 		ret.IdToken = string(idtoken)
 	}
-	ret.RefreshToken, err = loginpkg.CreateRefreshToken(l, user)
+	ret.RefreshToken, _ = loginpkg.CreateRefreshToken(l, user)
 
 	_, err = loginpkg.CleanupAuthorization(treq)
 	if err != nil {

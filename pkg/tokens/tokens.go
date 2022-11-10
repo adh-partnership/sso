@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 )
@@ -30,12 +31,37 @@ func GetRandomKey() (jwk.Key, bool) {
 	return KeySet.Key(rand.Intn(KeySet.Len()))
 }
 
+// Kubernetes' OIDC client only supports RS256 signed keys
+// so make sure we only get those
+func GetRandomKubernetesKey() (jwk.Key, bool) {
+	var key jwk.Key
+	var b bool
+	for key.Algorithm() != jwa.RS256 {
+		key, b = GetRandomKey()
+	}
+
+	return key, b
+}
+
+func CreateTokenKubernetes(issuer, audience, subject string, ttl int, claims map[string]interface{}) ([]byte, error) {
+	key, ok := GetRandomKubernetesKey()
+	if !ok {
+		return nil, ErrNoKeys
+	}
+
+	return createTokenFromKey(key, issuer, audience, subject, ttl, claims)
+}
+
 func CreateToken(issuer, audience, subject string, ttl int, claims map[string]interface{}) ([]byte, error) {
 	key, ok := GetRandomKey()
 	if !ok {
 		return nil, ErrNoKeys
 	}
 
+	return createTokenFromKey(key, issuer, audience, subject, ttl, claims)
+}
+
+func createTokenFromKey(key jwk.Key, issuer, audience, subject string, ttl int, claims map[string]interface{}) ([]byte, error) {
 	token := jwt.New()
 	token.Set(jwt.IssuerKey, issuer)
 	token.Set(jwt.AudienceKey, audience)
