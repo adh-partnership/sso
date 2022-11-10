@@ -27,8 +27,8 @@ import (
 	dbTypes "github.com/adh-partnership/api/pkg/database/models"
 	"github.com/adh-partnership/sso/database/models"
 	"github.com/gin-gonic/gin"
-	"github.com/lestrrat-go/jwx/jwk"
-	"github.com/lestrrat-go/jwx/jwt"
+	"github.com/lestrrat-go/jwx/v2/jwk"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 	"gorm.io/gorm/clause"
 	"hawton.dev/log4g"
 )

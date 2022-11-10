@@ -24,7 +24,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lestrrat-go/jwx/jwk"
+	"github.com/lestrrat-go/jwx/v2/jwk"
 	"hawton.dev/log4g"
 )
 
