@@ -274,7 +274,7 @@
   },
   "servers": [
     {
-      "url": "https://auth.denartcc.org",
+      "url": "https://auth.zdvartcc.org",
       "description": "Production OAuth2 Server"
     }
   ],

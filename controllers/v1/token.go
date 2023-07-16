@@ -157,7 +157,7 @@ func PostToken(c *gin.Context) {
 	var accessToken []byte
 	if strings.ToLower(l.Client.Name) != "kubernetes" {
 		accessToken, err = tokens.CreateToken(
-			utils.Getenv("SSO_ISSUERKEY", "auth.denartcc.org"),
+			utils.Getenv("SSO_ISSUERKEY", "auth.zdvartcc.org"),
 			l.Client.Name,
 			fmt.Sprint(l.CID),
 			l.Client.TTL,
@@ -167,7 +167,7 @@ func PostToken(c *gin.Context) {
 		)
 	} else {
 		accessToken, err = tokens.CreateTokenKubernetes(
-			utils.Getenv("SSO_ISSUERKEY", "auth.denartcc.org"),
+			utils.Getenv("SSO_ISSUERKEY", "auth.zdvartcc.org"),
 			l.Client.Name,
 			fmt.Sprint(l.CID),
 			l.Client.TTL,
@@ -185,7 +185,7 @@ func PostToken(c *gin.Context) {
 
 	if contains(treq.Scope, "openid") {
 		idtoken, err := tokens.CreateToken(
-			utils.Getenv("SSO_ISSUERKEY", "auth.denartcc.org"),
+			utils.Getenv("SSO_ISSUERKEY", "auth.zdvartcc.org"),
 			l.Client.Name,
 			fmt.Sprint(l.CID),
 			l.Client.TTL,
