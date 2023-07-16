@@ -28,11 +28,6 @@ import (
 	"hawton.dev/log4g"
 )
 
-type certReturn struct {
-	message string
-	keys    jwk.Set
-}
-
 func GetCerts(c *gin.Context) {
 	jkeyset := os.Getenv("SSO_JWKS")
 	keyset, err := jwk.Parse([]byte(jkeyset))

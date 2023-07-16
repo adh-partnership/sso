@@ -32,15 +32,11 @@ import (
 	"github.com/imdario/mergo"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"hawton.dev/log4g"
 )
 
 var DB *gorm.DB
 var MaxAttempts = 10
 var DelayBetweenAttempts = time.Minute * 1
-var attempt = 1
-
-var log = log4g.Category("db")
 
 type DBOptions struct {
 	Driver   string

@@ -23,7 +23,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -136,7 +136,7 @@ func GetCallback(c *gin.Context) {
 			return
 		}
 		defer request.Body.Close()
-		body, err := ioutil.ReadAll(request.Body)
+		body, err := io.ReadAll(request.Body)
 		if err != nil {
 			result <- Result{err: err}
 			return
@@ -172,7 +172,7 @@ func GetCallback(c *gin.Context) {
 		}
 		defer userResponse.Body.Close()
 
-		userBody, err := ioutil.ReadAll(userResponse.Body)
+		userBody, err := io.ReadAll(userResponse.Body)
 		if err != nil {
 			result <- Result{err: err}
 			return

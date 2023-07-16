@@ -34,7 +34,7 @@ import (
 )
 
 var (
-	ErrNoToken = errors.New("No Token Specified")
+	ErrNoToken = errors.New("no token specified")
 )
 
 var requireAuth bool
