@@ -11,6 +11,7 @@ on:
 
 env:
   SERVICE_NAME: auth
+  GOVER: ">=1.20"
 
 jobs:
   build:
