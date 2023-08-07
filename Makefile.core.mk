@@ -37,7 +37,7 @@ mod-vendor:
 
 .PHONY: dev
 dev:
-	@go run ./cmd/sso/main.go serve
+	@go run ./cmd/sso/main.go server
 
 .PHONY: clean
 clean:
