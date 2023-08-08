@@ -20,7 +20,9 @@ import (
 	"github.com/adh-partnership/api/pkg/database"
 	"github.com/adh-partnership/api/pkg/database/models"
 	"github.com/adh-partnership/api/pkg/logger"
+	"github.com/adh-partnership/sso/v2/internal/router"
 	"github.com/adh-partnership/sso/v2/pkg/config"
+	"github.com/adh-partnership/sso/v2/pkg/server"
 	"github.com/urfave/cli/v2"
 )
 
@@ -78,6 +80,14 @@ func newServerCommand() *cli.Command {
 			if err != nil {
 				return err
 			}
+
+			log.Infof("Building web server...")
+			srvr := server.NewServer(
+				router.SetupRoutes,
+			)
+
+			log.Infof("Building routes...")
+			srvr.BuildRoutes()
 
 			return nil
 		},

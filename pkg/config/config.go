@@ -38,6 +38,7 @@ type cfg struct {
 	JWKs     *jwk.Set
 	Database config.ConfigDatabase
 	OAuth    ConfigOAuth
+	Server   ConfigServer
 }
 
 type ConfigOAuth struct {
@@ -51,7 +52,12 @@ type ConfigOAuth struct {
 }
 
 type ConfigServer struct {
-	CookieName string `json:"cookie_name"`
+	Port         string `json:"port"`
+	Mode         string `json:"mode"` // accepted values: plain, tls, h2c
+	SSLCert      string `json:"ssl_cert"`
+	SSLKey       string `json:"ssl_key"`
+	CookieName   string `json:"cookie_name"`
+	CookieSecret string `json:"cookie_secret"`
 }
 
 var Cfg = &cfg{
@@ -74,6 +80,11 @@ var Cfg = &cfg{
 			"email",
 			"vatsim_details",
 		},
+	},
+	Server: ConfigServer{
+		Port:       "3000",
+		Mode:       "plain",
+		CookieName: "adh-sso",
 	},
 }
 
